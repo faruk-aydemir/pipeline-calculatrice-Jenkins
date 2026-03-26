@@ -44,7 +44,7 @@ pipeline {
 
                     sh '''
                     docker run --rm \
-                      -v $PWD/sources:/src \
+                      -v "$PWD/sources:/src" \
                       ${IMAGE} \
                       pyinstaller -F /src/prog.py
                     '''
