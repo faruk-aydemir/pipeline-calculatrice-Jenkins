@@ -31,5 +31,37 @@ pipeline {
             }
         }
 
+        stage('Deliver') {
+            agent any
+
+            environment {
+                IMAGE = 'cdrx/pyinstaller-linux'
+            }
+
+            steps {
+                dir("${env.BUILD_ID}") {
+                    unstash 'compiled-results'
+
+                    sh '''
+                    docker run --rm \
+                      -v $PWD/sources:/src \
+                      ${IMAGE} \
+                      pyinstaller -F /src/prog.py
+                    '''
+                }
+            }
+
+            post {
+                success {
+                    archiveArtifacts artifacts: "${env.BUILD_ID}/sources/dist/prog", fingerprint: true
+
+                    sh """
+                    rm -rf ${env.BUILD_ID}/sources/build
+                    rm -rf ${env.BUILD_ID}/sources/dist
+                    """
+                }
+            }
+        }
+
     }
 }
